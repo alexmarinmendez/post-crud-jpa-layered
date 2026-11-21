@@ -82,4 +82,18 @@ public class ApplicationTest {
                 () -> assertEquals("Title 1", post.getTitle())
         );
     }
+
+    @Test
+    @DisplayName("should update post with id=1")
+    @Sql(statements = "INSERT INTO post(id, user_id, title, body, version) VALUES (1, 1, 'Title 1', 'Body 1', 1)", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(statements = "DELETE FROM post", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    public void test5_testUpdatePost() {
+        Post post = new Post(1, 1, "New Title 1", "Body 1", 1);
+        restTemplate.put(baseUrl+"/{id}", post, 1);
+        Post postFromDB = testH2Repository.findById(1).get();
+        assertAll(
+                () -> assertNotNull(postFromDB),
+                () -> assertEquals("New Title 1", postFromDB.getTitle())
+        );
+    }
 }
