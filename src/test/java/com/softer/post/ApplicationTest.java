@@ -51,10 +51,21 @@ public class ApplicationTest {
 
     @Test
     @Order(2)
-    @DisplayName("should get all posts")
-    public void testGetPosts() {
+    @DisplayName("should get 0 posts when table is empty")
+    public void testGetPostsWhenTableIsEmpty() {
         List<Post> response = restTemplate.getForObject(baseUrl, List.class);
         assertEquals(0, response.size());
         assertEquals(0, testH2Repository.findAll().size());
+    }
+
+    @Test
+    @Order(3)
+    @DisplayName("should get all posts when table is not empty")
+    @Sql(statements = "INSERT INTO post(id, user_id, title, body, version) VALUES (1, 1, 'Title 1', 'Body 1', 1)", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(statements = "DELETE FROM post", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    public void testGetPostsWhenTableIsNotEmpty() {
+        List<Post> response = restTemplate.getForObject(baseUrl, List.class);
+        assertEquals(1, response.size());
+        assertEquals(1, testH2Repository.findAll().size());
     }
 }
