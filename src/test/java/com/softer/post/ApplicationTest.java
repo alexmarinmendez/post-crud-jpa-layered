@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -68,5 +68,18 @@ public class ApplicationTest {
         List<Post> response = restTemplate.getForObject(baseUrl, List.class);
         assertEquals(1, response.size());
         assertEquals(1, testH2Repository.findAll().size());
+    }
+
+    @Test
+    @DisplayName("should get post with id=1")
+    @Sql(statements = "INSERT INTO post(id, user_id, title, body, version) VALUES (1, 1, 'Title 1', 'Body 1', 1)", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(statements = "DELETE FROM post", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    public void test4_FindPostById() {
+        Post post = restTemplate.getForObject(baseUrl + "/{id}", Post.class, 1);
+        assertAll(
+                () -> assertNotNull(post),
+                () -> assertEquals(1, post.getId()),
+                () -> assertEquals("Title 1", post.getTitle())
+        );
     }
 }
