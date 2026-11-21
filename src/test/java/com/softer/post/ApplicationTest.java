@@ -96,4 +96,15 @@ public class ApplicationTest {
                 () -> assertEquals("New Title 1", postFromDB.getTitle())
         );
     }
+
+    @Test
+    @DisplayName("should delete post with id=1")
+    @Sql(statements = "INSERT INTO post(id, user_id, title, body, version) VALUES (1, 1, 'Title 1', 'Body 1', 1)", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(statements = "DELETE FROM post", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    public void test6_testDeletePost() {
+        int recordCount = testH2Repository.findAll().size();
+        assertEquals(1, recordCount);
+        restTemplate.delete(baseUrl+"/{id}", 1);
+        assertEquals(0, testH2Repository.findAll().size());
+    }
 }
