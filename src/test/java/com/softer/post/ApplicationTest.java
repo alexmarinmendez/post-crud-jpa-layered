@@ -16,7 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+//@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestMethodOrder(MethodOrderer.MethodName.class)
 public class ApplicationTest {
     @LocalServerPort
     private int port;
@@ -39,10 +40,10 @@ public class ApplicationTest {
 
     // --------------------------------- Integration Tests ----------------------------------
     @Test
-    @Order(1)
+    //@Order(1)
     @DisplayName("should register a new post")
     @Sql(statements = "DELETE FROM post", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    public void testAddPost() {
+    public void test3_testAddPost() {
         Post post = new Post(1, 1, "Title 1", "Body 1", null);
         Post response = restTemplate.postForObject(baseUrl, post, Post.class);
         assertEquals("Title 1", response.getTitle());
@@ -50,20 +51,20 @@ public class ApplicationTest {
     }
 
     @Test
-    @Order(2)
+    //@Order(2)
     @DisplayName("should get 0 posts when table is empty")
-    public void testGetPostsWhenTableIsEmpty() {
+    public void test1_testGetPostsWhenTableIsEmpty() {
         List<Post> response = restTemplate.getForObject(baseUrl, List.class);
         assertEquals(0, response.size());
         assertEquals(0, testH2Repository.findAll().size());
     }
 
     @Test
-    @Order(3)
+    //@Order(3)
     @DisplayName("should get all posts when table is not empty")
     @Sql(statements = "INSERT INTO post(id, user_id, title, body, version) VALUES (1, 1, 'Title 1', 'Body 1', 1)", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(statements = "DELETE FROM post", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    public void testGetPostsWhenTableIsNotEmpty() {
+    public void test2_testGetPostsWhenTableIsNotEmpty() {
         List<Post> response = restTemplate.getForObject(baseUrl, List.class);
         assertEquals(1, response.size());
         assertEquals(1, testH2Repository.findAll().size());
